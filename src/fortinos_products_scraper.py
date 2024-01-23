@@ -32,16 +32,18 @@ def get_image_url(image_element):
 
     return image_url
 
-def get_items_from_url(driver, url):
+def get_items_from_page(driver, url):
     # Navigate to the subcategory page
     driver.get(url)
     
-    # Wait for the items to load
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'css-175gnef')))
-    
-    # Find all item containers
-    item_containers = driver.find_elements(By.CLASS_NAME, "css-175gnef")
+    try:
+        # Wait for the items to load
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'css-175gnef')))
+        # Find all item containers
+        item_containers = driver.find_elements(By.CLASS_NAME, "css-175gnef")
+    except:
+        return None
     
     # List to hold all items
     items = []
@@ -95,6 +97,33 @@ def get_items_from_url(driver, url):
     
     return items
 
+def get_items_from_all_pages(driver, base_url):
+    page_number = 1
+    all_items = []
+
+    while True:
+        # Construct URL with page number
+        url = f"{base_url}?page={page_number}"
+        print(f"Scraping {url}")
+
+        # Get items from the current page
+        items = get_items_from_page(driver, url)
+
+        # If no items found, we've reached the end of the pagination
+        if not items:
+            print(f"No items found on page {page_number}. End of pages reached.")
+            break
+
+        print(f'Scraped {len(items)} items')
+
+        # Append the items from the current page to the all_items list
+        all_items.extend(items)
+
+        # Increment the page number
+        page_number += 1
+    
+    return all_items
+
 # Set up the Selenium browser instance with Chrome
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")  # Optional: Run in headless mode without opening a browser window
@@ -102,12 +131,12 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
 
 try:
-    url = "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195?page=1"
-    items_info = get_items_from_url(driver, url)
+    base_url = "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195"
+    all_items_info = get_items_from_all_pages(driver, base_url)
 
-    print(len(items_info))
+    print(f"Total items scraped: {len(all_items_info)}")
 
-    for item in items_info:
+    for item in all_items_info:
         if item['image_url']:
             download_image(item['image_url'], 'downloaded_images', item['product_number'])
         print(item)
