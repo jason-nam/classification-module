@@ -117,7 +117,7 @@ def get_items_from_all_pages(driver, base_url):
         print(f'Scraped {len(items)} items')
 
         # Append the items from the current page to the all_items list
-        all_items.extend(items)
+        all_items.extend(item for item in items if item not in all_items)
 
         # Increment the page number
         page_number += 1
