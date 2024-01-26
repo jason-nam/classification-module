@@ -33,7 +33,7 @@ def get_image_url(image_element):
 
     return image_url
 
-def get_items_from_page(driver, url):
+def get_product_details_from_page(driver, url):
     # Navigate to the subcategory page
     driver.get(url)
     
@@ -98,7 +98,7 @@ def get_items_from_page(driver, url):
     
     return items
 
-def get_items_from_all_pages(driver, base_url):
+def get_all_product_details(driver, base_url):
     page_number = 1
     all_items = []
 
@@ -108,7 +108,7 @@ def get_items_from_all_pages(driver, base_url):
         print(f"Scraping {url}")
 
         # Get items from the current page
-        items = get_items_from_page(driver, url)
+        items = get_product_details_from_page(driver, url)
 
         # If no items found, we've reached the end of the pagination
         if not items:
@@ -133,13 +133,13 @@ driver = webdriver.Chrome(service=service, options=options)
 
 try:
     base_url = "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195"
-    all_items_info = get_items_from_all_pages(driver, base_url)
+    all_items_info = get_product_details(driver, base_url)
 
     print(f"Total items scraped: {len(all_items_info)}")
 
     for item in all_items_info:
-        if item['image_url']:
-            download_image(item['image_url'], 'downloaded_images', item['product_number'])
+    #     if item['image_url']:
+    #         download_image(item['image_url'], 'downloaded_images', item['product_number'])
         print(item)
 finally:
     driver.quit()
