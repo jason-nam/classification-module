@@ -1,16 +1,10 @@
 import json
+from selenium.webdriver.common.by import By
 
 
-# retrieve configurations for each website
-with open('config.json', 'r') as file:
-    config = json.load(file)
-
-def execute_workflow(driver, store_name, workflow_name):
-
+def execute_workflow(driver, config, store_name, workflow_name):
+    '''function to execute pre-determined workflows from config
     '''
-    function to execute pre-determined workflows from config
-    '''
-
     workflow = config['stores'][store_name]['workflows'][workflow_name]
     result = None
 
@@ -22,6 +16,8 @@ def execute_workflow(driver, store_name, workflow_name):
                     result = element.get_attribute(step['attribute'])
                 elif step['operation'] == 'get_text':
                     result = element.text
+                elif not step['operation']:
+                    result = element
         elif step['action'] == 'strip' and result is not None:
             result = result.strip()
 

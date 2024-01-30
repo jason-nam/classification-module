@@ -1,6 +1,7 @@
+import json
 import requests
 import os
-
+import abc
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,8 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def download_image(image_url, folder_path, product_number):
 
-    '''
-    download images given image url
+    '''download images given image url
     '''
 
     if not os.path.exists(folder_path):
@@ -28,8 +28,7 @@ def download_image(image_url, folder_path, product_number):
 
 def get_image_url(image_element):
 
-    '''
-    retrieve image url from website
+    '''retrieve image url from website
     '''
 
     image_url = image_element.get_attribute('src')
@@ -41,11 +40,9 @@ def get_image_url(image_element):
 
 def get_product_details_from_page(driver, url):
 
-    '''
-    get details of products from a category page
+    '''get details of products from a category page
     '''
 
-    # Navigate to the subcategory page
     driver.get(url)
     
     try:
@@ -111,8 +108,7 @@ def get_product_details_from_page(driver, url):
 
 def get_all_product_details(driver, base_url):
 
-    '''
-    get all details of products given category and url
+    '''get all details of products given category and url
     '''
 
     page_number = 1

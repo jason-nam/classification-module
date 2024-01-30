@@ -133,7 +133,7 @@ driver = webdriver.Chrome(service=service, options=options)
 
 try:
     base_url = "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195"
-    all_items_info = get_product_details(driver, base_url)
+    all_items_info = get_all_product_details(driver, base_url)
 
     print(f"Total items scraped: {len(all_items_info)}")
 

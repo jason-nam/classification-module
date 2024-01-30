@@ -1,65 +1,75 @@
 {
     "stores": {
         "Fortinos": {
-            "base_url": "https://www.fortinos.ca",
-                "workflows": {
-                    "get_product_brand": [
-                        {
-                            "action": "find_element",
-                            "by": "CSS_SELECTOR",
-                            "selector": "[data-testid='product-brand']",
-                            "operation": "get_text"
-                        },
-                        {
-                            "action": "strip"
-                        }
-                    ],
-                    "get_product_name": [
-                        {
-                            "action": "find_element",
-                            "by": "CSS_SELECTOR",
-                            "selector": "[data-testid='product-title']",
-                            "operation": "get_text"
-                        },
-                        {
-                            "action": "strip"
-                        }
-                    ],
-                    "get_product_was_price": [
-                        {
-                            "action": "find_element",
-                            "by": "CSS_SELECTOR",
-                            "selector": "[data-testid='was-price']",
-                            "operation": "get_text"
-                        },
-                        {
-                            "action": "strip"
-                        }
-                    ],
-                    "get_product_price": [
-                        {
-                            "action": "find_element",
-                            "by": "CSS_SELECTOR",
-                            "selector": "[data-testid='price']",
-                            "operation": "get_text"
-                        },
-                        {
-                            "action": "strip"
-                        }
-                    ],
-                    "get_product_number": [
-                        {
-                            "action": "find_element",
-                            "by": "CSS_SELECTOR",
-                            "selector": "[data-testid='product-title']",
-                            "operation": "get_attribute",
-                            "attribute": "id"
-                        },
-                        {
-                            "action": "strip"
-                        }
-                    ]
-                }
+            "base_url": "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195",
+            "item_container": "css-175gnef",
+            "workflows": {
+                "get_product_brand": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "[data-testid='product-brand']",
+                        "operation": "get_text"
+                    },
+                    {
+                        "action": "strip"
+                    }
+                ],
+                "get_product_name": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "[data-testid='product-title']",
+                        "operation": "get_text"
+                    },
+                    {
+                        "action": "strip"
+                    }
+                ],
+                "get_product_was_price": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "[data-testid='was-price']",
+                        "operation": "get_text"
+                    },
+                    {
+                        "action": "strip"
+                    }
+                ],
+                "get_product_price": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "[data-testid='price']",
+                        "operation": "get_text"
+                    },
+                    {
+                        "action": "strip"
+                    }
+                ],
+                "get_product_number": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "[data-testid='product-title']",
+                        "operation": "get_attribute",
+                        "attribute": "id"
+                    },
+                    {
+                        "action": "strip"
+                    }
+                ],
+                "get_product_image_url": [
+                    {
+                        "action": "find_element",
+                        "by": "CSS_SELECTOR",
+                        "selector": "img.chakra-image",
+                        "operation": "",
+                        "attribute": ""
+                    }
+                ]
+            }
         }
 
         
