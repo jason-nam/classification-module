@@ -8,22 +8,20 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
-from workflows import execute_workflow
-
 
 class ProductsScraper(abc.ABC):
     '''Abstract products scraper class
     '''
     def __init__(self, grocery_store_name):
         self.store_name = grocery_store_name
+        self.products_list = []
 
         with open('config.json', 'r') as file:
             self.config = json.load(file)
 
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless")  # Optional: Run in headless mode
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=options)
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument("--headless")  # Optional: Run in headless mode
+        self.service = Service(ChromeDriverManager().install())
 
     @abc.abstractmethod
     def get_all_products(self):

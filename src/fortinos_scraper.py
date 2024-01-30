@@ -9,6 +9,9 @@ from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
 from workflows import execute_workflow
+from web_crawler import get_urls
+from global_vars import FORTINOS_BASE_URL
+
 from products_scraper import ProductsScraper
 
 
@@ -20,15 +23,35 @@ class FortinosProductsScraper(ProductsScraper):
 
         self.store_name = "Fortinos"
 
-    def get_all_products(self):
+    def _get_url(self):
+        # self.driver = webdriver.Chrome(service=self.service, options=self.options)
+        base_urls = FORTINOS_BASE_URL
+        all_urls = []
 
         try:
-            base_url = self.config['stores'][self.store_name]['base_url']
-            all_items_info = self.iter_pages(base_url)
+            for base_url in base_urls:
+                all_urls = list(set(get_urls(self.driver, base_url)).union(all_urls))
+        finally:
+            # self.driver.quit()
+            pass
 
-            print(f"Total items scraped: {len(all_items_info)}")
+        return all_urls
+
+    def get_all_products(self):
+
+        self.driver = webdriver.Chrome(service=self.service, options=self.options)
+
+        base_urls = self._get_url()
+
+        len(base_urls)
+
+        try:
+            for base_url in base_urls:
+                self.iter_pages(base_url)
+
+                print(f"Total items scraped: {len(self.products_list)}")
             
-            for item in all_items_info:
+            for item in self.products_list:
                 print(item)
 
         finally:
@@ -36,7 +59,6 @@ class FortinosProductsScraper(ProductsScraper):
 
     def iter_pages(self, base_url):
         page_number = 1
-        all_items = []
 
         while True:
             url = f"{base_url}?page={page_number}"
@@ -48,20 +70,15 @@ class FortinosProductsScraper(ProductsScraper):
                 break
 
             print(f'Scraped {len(items)} items')
-            all_items.extend(item for item in items if item not in all_items)
+            self.products_list.extend(item for item in items if item not in self.products_list)
             page_number += 1
-        
-        return all_items            
 
     def scrape_items(self, url):
-        self.driver.get(url)
-        item_container_class = self.config['stores'][self.store_name]['item_container']
-    
         try:
-            # Wait for the items to load
+            self.driver.get(url)
+            item_container_class = self.config['stores'][self.store_name]['item_container']
             wait = WebDriverWait(self.driver, 10)
             wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, item_container_class)))
-            # Find all item containers
             item_containers = self.driver.find_elements(By.CLASS_NAME, item_container_class)
         except:
             return None

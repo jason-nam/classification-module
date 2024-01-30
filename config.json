@@ -1,7 +1,7 @@
 {
     "stores": {
         "Fortinos": {
-            "base_url": "https://www.fortinos.ca/food/fruits-vegetables/fresh-vegetables/c/28195",
+            "base_url": "https://www.fortinos.ca/food/c/27985",
             "item_container": "css-175gnef",
             "workflows": {
                 "get_product_brand": [
