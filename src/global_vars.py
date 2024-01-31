@@ -19,3 +19,7 @@ FORTINOS_BASE_URL = [
     "https://www.fortinos.ca/joe-fresh/toddlers/boys/c/56574",
     "https://www.fortinos.ca/joe-fresh/baby/c/56770"
 ]
+
+FORTINOS_AVOID_URL = [
+    ""
+]

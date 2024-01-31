@@ -1,5 +1,3 @@
-import requests
-import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,11 +6,51 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
+import requests
+import os
+import logging
+
 from workflows import execute_workflow
 from web_crawler import get_urls
 from global_vars import FORTINOS_BASE_URL
 
 from products_scraper import ProductsScraper
+
+
+def find_fortino_sku_product(sku):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
+    try:
+        url = f"https://www.fortinos.ca/search?search-bar={sku}"
+        driver.get(url)
+
+        # Wait up to 10 seconds for the elements to be present
+        wait = WebDriverWait(driver, 10)
+        
+        product_brand = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-name__item--brand"))).text.strip()
+        product_name = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-name__item--name"))).text.strip()
+        product_price = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "selling-price-list__item__price--now-price__value"))).text.strip()
+        product_was_price = None # TODO
+        product_link = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-tile__details__info__name__link")))
+        product_href = product_link.get_attribute('href')
+        product_href_last_section = product_href.split('/')[-1].strip()
+        product_image_url = None # TODO
+
+    finally:
+        driver.quit()
+
+    return {
+            "store": "Fortinos",
+            "brand": product_brand,
+            "name": product_name,
+            "price": product_price,
+            "was_price": product_was_price,
+            "product_number": product_href_last_section,
+            "image_url": product_image_url
+        }
 
 
 class FortinosProductsScraper(ProductsScraper):
@@ -22,6 +60,8 @@ class FortinosProductsScraper(ProductsScraper):
         super().__init__(grocery_store_name)
 
         self.store_name = "Fortinos"
+
+        logging.basicConfig(level=logging.INFO)
 
     def _get_url(self):
         # self.driver = webdriver.Chrome(service=self.service, options=self.options)
@@ -36,20 +76,23 @@ class FortinosProductsScraper(ProductsScraper):
             pass
 
         return all_urls
+    
+    def get_products_list(self):
+        pass
 
-    def get_all_products(self):
+    def find_all_products(self):
 
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
 
         base_urls = self._get_url()
 
-        len(base_urls)
+        logging.info(f'URLs extracted: {len(base_urls)}')
 
         try:
             for base_url in base_urls:
                 self.iter_pages(base_url)
 
-                print(f"Total items scraped: {len(self.products_list)}")
+                logging.info(f"Total items scraped: {len(self.products_list)}")
             
             for item in self.products_list:
                 print(item)
@@ -62,14 +105,14 @@ class FortinosProductsScraper(ProductsScraper):
 
         while True:
             url = f"{base_url}?page={page_number}"
-            print(f"Scraping {url}")
+            logging.info(f"Scraping {url}")
             items = self.scrape_items(url)
 
             if not items:
-                print(f"No items found on page {page_number}. End of pages reached.")
+                logging.info(f"No items found on page {page_number}. End of pages reached.")
                 break
 
-            print(f'Scraped {len(items)} items')
+            logging.info(f'Scraped {len(items)} items')
             self.products_list.extend(item for item in items if item not in self.products_list)
             page_number += 1
 
@@ -84,7 +127,7 @@ class FortinosProductsScraper(ProductsScraper):
             return None
         
         items = []
-        for item in item_containers:            
+        for item in item_containers:     
             brand = self._get_brand(item)
             name = self._get_name(item)
             was_price = self._get_was_price(item)
@@ -177,7 +220,7 @@ class FortinosProductsScraper(ProductsScraper):
             with open(os.path.join(folder_path, product_number + '.png'), 'wb') as file:
                 file.write(response.content)
         else:
-            print(f"Failed to download image for product number {product_number}")
+            logging.info(f"Failed to download image for product number {product_number}")
 
 
 if __name__ == "__main__":

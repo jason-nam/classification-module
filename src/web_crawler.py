@@ -9,17 +9,18 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 import logging
 
-from global_vars import FORTINOS_BASE_URL
+from global_vars import FORTINOS_BASE_URL, FORTINOS_AVOID_URL
 
 
 BAD_CHARACTERS = ['?', '#', '=']
 
-logging.basicConfig(level=logging.INFO)
+def _setup_logging():
+    logging.basicConfig(level=logging.INFO)
 
-def get_urls(driver, url):
+def crawl_through_urls(driver, url):
     try:
         driver.get(url)
-        WebDriverWait(driver, 40).until(EC.presence_of_all_elements_located((By.TAG_NAME, "a")))
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, "a")))
 
         anchors = driver.find_elements(By.TAG_NAME, "a")
         links = set()
@@ -30,23 +31,30 @@ def get_urls(driver, url):
             try:
                 anchor = driver.find_elements(By.TAG_NAME, "a")[i]
                 link = anchor.get_attribute('href')
+
+                # if (
+                #     link and url not in link 
+                #     and '/c/' in link and '?' in link
+                # ):
+                #     full_url = urljoin(url, link.split('?')[0] if '?' in link else None)
+                #     if (full_url in FORTINOS_AVOID_URL):
+                #         logging.info(f'Avoided {full_url}')
+                #         continue
+                #     links.add(full_url)
+                #     logging.info(f'Extracted {full_url}')
+                    
                 if (
-                    link and url not in link 
-                    and '/c/' in link and '?' in link
-                ):
-                    full_url = urljoin(url, link.split('?')[0] if '?' in link else None)
-                    links.add(full_url)
-                elif (
                     link and url not in link
                     and not any(char in link for char in BAD_CHARACTERS) 
                     and '/c/' in link
                 ):
-                    full_url = urljoin(url, link)
+                    full_url = urljoin(url, link) 
+                    if (full_url in FORTINOS_AVOID_URL):
+                        logging.info(f'Avoided {full_url}')
+                        continue
                     links.add(full_url)
+                    logging.info(f'Extracted {full_url}')
 
-                # if link and url not in link and not any(char in link for char in BAD_CHARACTERS) and '/c/' in link:
-                #     full_url = urljoin(url, link)
-                #     links.add(full_url)
             except StaleElementReferenceException:
                 continue
 
@@ -62,6 +70,8 @@ def get_urls(driver, url):
 
 
 if __name__ == "__main__":
+    _setup_logging()
+
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     service = Service(ChromeDriverManager().install())
@@ -72,9 +82,11 @@ if __name__ == "__main__":
 
     try:
         for base_url in base_urls:
-            all_urls = list(set(get_urls(driver, base_url)).union(all_urls))
+            all_urls = list(set(crawl_through_urls(driver, base_url)).union(all_urls))
 
         for url in all_urls:
             print(url)
     finally:
         driver.quit()
+else:
+    logging.basicConfig(level=logging.WARNING)
