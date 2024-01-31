@@ -11,7 +11,8 @@ import os
 import logging
 
 from workflows import execute_workflow
-from web_crawler import get_urls
+from web_crawler import crawl_through_urls
+from track_logs import setup_logging_info, setup_logging_warning
 from global_vars import FORTINOS_BASE_URL
 
 from products_scraper import ProductsScraper
@@ -61,8 +62,6 @@ class FortinosProductsScraper(ProductsScraper):
 
         self.store_name = "Fortinos"
 
-        logging.basicConfig(level=logging.INFO)
-
     def _get_url(self):
         # self.driver = webdriver.Chrome(service=self.service, options=self.options)
         base_urls = FORTINOS_BASE_URL
@@ -70,7 +69,7 @@ class FortinosProductsScraper(ProductsScraper):
 
         try:
             for base_url in base_urls:
-                all_urls = list(set(get_urls(self.driver, base_url)).union(all_urls))
+                all_urls = list(set(crawl_through_urls(self.driver, base_url)).union(all_urls))
         finally:
             # self.driver.quit()
             pass
@@ -224,5 +223,8 @@ class FortinosProductsScraper(ProductsScraper):
 
 
 if __name__ == "__main__":
+    setup_logging_info()
     fortinos_products = FortinosProductsScraper("Fortinos")
     fortinos_products.get_all_products()
+else:
+    setup_logging_warning()

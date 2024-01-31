@@ -9,13 +9,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 import logging
 
+from track_logs import setup_logging_info, setup_logging_warning
 from global_vars import FORTINOS_BASE_URL, FORTINOS_AVOID_URL
 
 
 BAD_CHARACTERS = ['?', '#', '=']
-
-def _setup_logging():
-    logging.basicConfig(level=logging.INFO)
 
 def crawl_through_urls(driver, url):
     try:
@@ -70,7 +68,7 @@ def crawl_through_urls(driver, url):
 
 
 if __name__ == "__main__":
-    _setup_logging()
+    setup_logging_info()
 
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
@@ -89,4 +87,4 @@ if __name__ == "__main__":
     finally:
         driver.quit()
 else:
-    logging.basicConfig(level=logging.WARNING)
+    setup_logging_warning()
