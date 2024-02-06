@@ -9,6 +9,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 import os
 import logging
+import json
 
 from workflows import execute_workflow
 from web_crawler import crawl_through_urls
@@ -61,6 +62,12 @@ class FortinosProductsScraper(ProductsScraper):
         super().__init__(grocery_store_name)
 
         self.store_name = "Fortinos"
+        try:
+            with open(f'products.json', 'r') as products_list:
+                self.products_list = json.load(products_list)
+                logging.info(f'Uploaded existing products list that contains {len(self.products_list)} items')
+        except:
+            logging.info(f'Failed to upload existing products list')
 
     def _get_url(self):
         # self.driver = webdriver.Chrome(service=self.service, options=self.options)
@@ -76,14 +83,17 @@ class FortinosProductsScraper(ProductsScraper):
 
         return all_urls
     
-    def get_products_list(self):
-        pass
+    def generate_json(self):
+        file_name = 'products'
+        with open(f'{file_name}.json', 'w') as file:
+            json.dump(self.products_list, file)
 
     def find_all_products(self):
 
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
 
-        base_urls = self._get_url()
+        base_urls = []
+        base_urls.append(self.config['stores'][self.store_name]['base_url'])
 
         logging.info(f'URLs extracted: {len(base_urls)}')
 
@@ -93,14 +103,15 @@ class FortinosProductsScraper(ProductsScraper):
 
                 logging.info(f"Total items scraped: {len(self.products_list)}")
             
-            for item in self.products_list:
-                print(item)
+            # for item in self.products_list:
+            #     print(item)
 
         finally:
             self.driver.quit()
 
     def iter_pages(self, base_url):
-        page_number = 1
+        # page_number = 1
+        page_number = 25
 
         while True:
             url = f"{base_url}?page={page_number}"
@@ -147,63 +158,53 @@ class FortinosProductsScraper(ProductsScraper):
         return items
     
     def _get_brand(self, item):
+        brand = None
         try:
             workflow_name = "get_product_brand"
             brand = execute_workflow(item, self.config, self.store_name, workflow_name)
-        except NoSuchElementException:
-            brand = None
         finally:
             return brand
         
     def _get_name(self, item):
+        name = None
         try:
             workflow_name = "get_product_name"
             name = execute_workflow(item, self.config, self.store_name, workflow_name)
-        except NoSuchElementException:
-            name = None
         finally:
             return name
         
     def _get_was_price(self, item):
+        was_price = None
         try:
             workflow_name = "get_product_was_price"
             was_price = execute_workflow(item, self.config, self.store_name, workflow_name)
-        except NoSuchElementException:
-            was_price = None
         finally:
             return was_price
         
     def _get_price(self, item):
+        price = None
         try:
             workflow_name = "get_product_price"
             price = execute_workflow(item, self.config, self.store_name, workflow_name)
-        except NoSuchElementException:
-            price = None
         finally:
             return price
         
     def _get_product_number(self, item):
+        product_number = None
         try:
             workflow_name = "get_product_number"
             product_number = execute_workflow(item, self.config, self.store_name, workflow_name)
-        except NoSuchElementException:
-            product_number = None
         finally:
             return product_number
 
     def _get_image_url(self, item):
+        image_url = None
         try:
             workflow_name = "get_product_image_url"
             image_element = execute_workflow(item, self.config, self.store_name, workflow_name)
-
             self.driver.execute_script("arguments[0].scrollIntoView();", image_element)
             WebDriverWait(self.driver, 5).until(EC.visibility_of(image_element))  # Wait for image to be visible
-
             image_url = image_element.get_attribute('src')
-
-        except NoSuchElementException:
-            image_url = None
-
         finally:
             if not image_url or 'data:image' in image_url:  # Placeholder images are sometimes encoded in base64
                 image_url = image_element.get_attribute('data-src')
@@ -225,6 +226,7 @@ class FortinosProductsScraper(ProductsScraper):
 if __name__ == "__main__":
     setup_logging_info()
     fortinos_products = FortinosProductsScraper("Fortinos")
-    fortinos_products.get_all_products()
+    fortinos_products.find_all_products()
+    fortinos_products.generate_json()
 else:
     setup_logging_warning()

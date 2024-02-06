@@ -1,8 +1,8 @@
 {
     "stores": {
         "Fortinos": {
-            "base_url": "https://www.fortinos.ca/",
-            "item_container": "css-175gnef",
+            "base_url": "https://www.fortinos.ca/food/c/27985",
+            "item_container": "css-f5i5wc",
             "workflows": {
                 "get_product_brand": [
                     {

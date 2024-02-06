@@ -87,4 +87,5 @@ if __name__ == "__main__":
     finally:
         driver.quit()
 else:
-    setup_logging_warning()
+    # setup_logging_warning()
+    setup_logging_info()

@@ -24,7 +24,7 @@ class ProductsScraper(abc.ABC):
         self.service = Service(ChromeDriverManager().install())
 
     @abc.abstractmethod
-    def get_all_products(self):
+    def find_all_products(self):
         raise NotImplementedError
 
     @abc.abstractmethod
